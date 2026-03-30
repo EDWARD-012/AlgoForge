@@ -1,0 +1,3 @@
+# AlgoForge Python compiler dependencies
+# Since we execute Python code inside Docker, add any required Python packages here.
+# Currently, standard LeetCode problems only require the Python standard library.
