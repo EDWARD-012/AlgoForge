@@ -25,38 +25,168 @@ export const mockProblems = [
     title: "Two Sum",
     difficulty: "Easy",
     topic: "Arrays",
-    description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.",
+    tags: ["Array", "Hash Table"],
+    acceptance: "49.1%",
+    description: "Given an array of integers `nums` and an integer `target`, return *indices of the two numbers such that they add up to* `target`.\n\nYou may assume that each input would have **exactly one solution**, and you may not use the same element twice.\n\nYou can return the answer in any order.",
+    examples: [
+      {
+        input: "nums = [2,7,11,15], target = 9",
+        output: "[0,1]",
+        explanation: "Because nums[0] + nums[1] == 9, we return [0, 1]."
+      },
+      {
+        input: "nums = [3,2,4], target = 6",
+        output: "[1,2]",
+        explanation: "Because nums[1] + nums[2] == 6, we return [1, 2]."
+      },
+      {
+        input: "nums = [3,3], target = 6",
+        output: "[0,1]",
+        explanation: null
+      }
+    ],
+    constraints: [
+      "2 <= nums.length <= 10⁴",
+      "-10⁹ <= nums[i] <= 10⁹",
+      "-10⁹ <= target <= 10⁹",
+      "Only one valid answer exists."
+    ],
     starterCode: {
-      cpp: "class Solution {\npublic:\n    // arr = {nums, target} style: arr[0..n-2] are elements, arr[n-1] is target\n    vector<int> solve(vector<int>& arr) {\n        int n = arr.size();\n        int target = arr[n - 1];\n        for (int i = 0; i < n - 1; i++)\n            for (int j = i + 1; j < n - 1; j++)\n                if (arr[i] + arr[j] == target)\n                    return {i, j};\n        return {-1, -1};\n    }\n};",
-      java: "class Solution {\n    // arr last element is target; rest are nums\n    public int[] solve(int[] arr) {\n        int n = arr.length;\n        int target = arr[n - 1];\n        for (int i = 0; i < n - 1; i++)\n            for (int j = i + 1; j < n - 1; j++)\n                if (arr[i] + arr[j] == target)\n                    return new int[]{i, j};\n        return new int[]{-1, -1};\n    }\n}",
-      python: "class Solution:\n    # arr: last element is target; rest are nums\n    def solve(self, arr):\n        target = arr[-1]\n        nums = arr[:-1]\n        seen = {}\n        for i, val in enumerate(nums):\n            if target - val in seen:\n                return [seen[target - val], i]\n            seen[val] = i\n        return [-1, -1]",
-      javascript: "// Note: JS execution not yet supported via Docker.\n// Please use C++, Java, or Python.\nfunction solve(arr) {\n    \n}"
+      cpp: `class Solution {
+public:
+    vector<int> solve(vector<int>& arr) {
+        // arr = [num1, num2, ..., numN, target]
+        // The last element is target; rest are nums
+        
+    }
+};`,
+      java: `class Solution {
+    public int[] solve(int[] arr) {
+        // arr = [num1, num2, ..., numN, target]
+        // The last element is target; rest are nums
+        
+    }
+}`,
+      python: `class Solution:
+    def solve(self, arr):
+        # arr = [num1, num2, ..., numN, target]
+        # The last element is target; rest are nums
+        pass
+`,
+      javascript: `// JavaScript is not yet supported for execution.
+// Please switch to C++, Python, or Java.
+var solve = function(arr) {
+    
+};`
     }
   },
   {
     id: 2,
     title: "Valid Parentheses",
-    difficulty: "Medium",
+    difficulty: "Easy",
     topic: "Stacks",
-    description: "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.\n\nAn input string is valid if open brackets are closed by the same type of brackets and in the correct order.",
+    tags: ["String", "Stack"],
+    acceptance: "40.7%",
+    description: "Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['` and `']'`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
+    examples: [
+      {
+        input: 's = "()"',
+        output: "true",
+        explanation: null
+      },
+      {
+        input: 's = "()[]{}"',
+        output: "true",
+        explanation: null
+      },
+      {
+        input: 's = "(]"',
+        output: "false",
+        explanation: null
+      }
+    ],
+    constraints: [
+      "1 <= s.length <= 10⁴",
+      "s consists of parentheses only '()[]{}'."
+    ],
     starterCode: {
-      cpp: "class Solution {\npublic:\n    // The wrapper passes arr = {ascii values}; but for this problem\n    // write your logic assuming arr represents your working data\n    vector<int> solve(vector<int>& arr) {\n        // Placeholder: return arr unchanged\n        return arr;\n    }\n};",
-      java: "class Solution {\n    public int[] solve(int[] arr) {\n        return arr;\n    }\n}",
-      python: "class Solution:\n    def solve(self, arr):\n        return arr",
-      javascript: "// JS execution not yet supported via Docker.\nfunction solve(arr) {\n    \n}"
+      cpp: `class Solution {
+public:
+    vector<int> solve(vector<int>& arr) {
+        // arr contains ASCII values of the string characters
+        // Return [1] for valid, [0] for invalid
+        
+    }
+};`,
+      java: `class Solution {
+    public int[] solve(int[] arr) {
+        // arr contains ASCII values of the string characters
+        // Return [1] for valid, [0] for invalid
+        
+    }
+}`,
+      python: `class Solution:
+    def solve(self, arr):
+        # arr contains ASCII values of the string characters
+        # Return [1] for valid, [0] for invalid
+        pass
+`,
+      javascript: `// JavaScript is not yet supported for execution.
+var solve = function(arr) {
+    
+};`
     }
   },
   {
     id: 3,
-    title: "Merge k Sorted Lists",
-    difficulty: "Hard",
-    topic: "Linked Lists",
-    description: "You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.\n\nThe linked-lists are merged by splicing together the nodes of the first two lists, and so on.",
+    title: "Best Time to Buy and Sell Stock",
+    difficulty: "Easy",
+    topic: "Arrays",
+    tags: ["Array", "Dynamic Programming"],
+    acceptance: "54.3%",
+    description: "You are given an array `prices` where `prices[i]` is the price of a given stock on the `iᵗʰ` day.\n\nYou want to maximize your profit by choosing a **single day** to buy one stock and choosing a **different day in the future** to sell that stock.\n\nReturn *the maximum profit you can achieve from this transaction*. If you cannot achieve any profit, return `0`.",
+    examples: [
+      {
+        input: "prices = [7,1,5,3,6,4]",
+        output: "5",
+        explanation: "Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5."
+      },
+      {
+        input: "prices = [7,6,4,3,1]",
+        output: "0",
+        explanation: "In this case, no transactions are done and the max profit = 0."
+      }
+    ],
+    constraints: [
+      "1 <= prices.length <= 10⁵",
+      "0 <= prices[i] <= 10⁴"
+    ],
     starterCode: {
-      cpp: "class Solution {\npublic:\n    vector<int> solve(vector<int>& arr) {\n        // Placeholder\n        sort(arr.begin(), arr.end());\n        return arr;\n    }\n};",
-      java: "import java.util.*;\nclass Solution {\n    public int[] solve(int[] arr) {\n        Arrays.sort(arr);\n        return arr;\n    }\n}",
-      python: "class Solution:\n    def solve(self, arr):\n        return sorted(arr)",
-      javascript: "// JS execution not yet supported via Docker.\nfunction solve(arr) {\n    \n}"
+      cpp: `class Solution {
+public:
+    vector<int> solve(vector<int>& arr) {
+        // arr = prices array
+        // Return [maxProfit]
+        
+    }
+};`,
+      java: `class Solution {
+    public int[] solve(int[] arr) {
+        // arr = prices array
+        // Return [maxProfit]
+        
+    }
+}`,
+      python: `class Solution:
+    def solve(self, arr):
+        # arr = prices array
+        # Return [maxProfit]
+        pass
+`,
+      javascript: `// JavaScript is not yet supported for execution.
+var solve = function(arr) {
+    
+};`
     }
   }
 ];
