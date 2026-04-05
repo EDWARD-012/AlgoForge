@@ -39,16 +39,21 @@ export const Login = () => {
     }
   };
 
+  const [gLoading, setGLoading] = useState(false);
+
   const googleLogin = useGoogleLogin({
+    flow: 'implicit',
     onSuccess: async (tokenResponse) => {
+      setGLoading(true);
+      setError('');
       try {
-        // Placeholder: send access_token to our backend for verification
-        // const { data } = await api.post('/auth/google', { token: tokenResponse.access_token });
-        // login(data, data.token);
-        console.log('Google OAuth success – token ready for backend:', tokenResponse.access_token);
-        alert('Google OAuth connected! Backend endpoint /api/auth/google is the next step.');
+        const { data } = await api.post('/auth/google', { token: tokenResponse.access_token });
+        login(data, data.token);
+        navigate('/dashboard');
       } catch (err) {
-        setError('Google sign-in failed. Please try again.');
+        setError(err.response?.data?.error || 'Google sign-in failed. Please try again.');
+      } finally {
+        setGLoading(false);
       }
     },
     onError: () => setError('Google sign-in was cancelled or failed.'),

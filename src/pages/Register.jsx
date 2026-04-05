@@ -40,13 +40,22 @@ export const Register = () => {
     }
   };
 
+  const [gLoading, setGLoading] = useState(false);
+
   const googleLogin = useGoogleLogin({
+    flow: 'implicit',
     onSuccess: async (tokenResponse) => {
-      // Placeholder: send access_token to our backend for verification
-      // const { data } = await api.post('/auth/google', { token: tokenResponse.access_token });
-      // login(data, data.token);
-      console.log('Google OAuth success – token ready for backend:', tokenResponse.access_token);
-      alert('Google OAuth connected! Backend endpoint /api/auth/google is the next step.');
+      setGLoading(true);
+      setError('');
+      try {
+        const { data } = await api.post('/auth/google', { token: tokenResponse.access_token });
+        login(data, data.token);
+        navigate('/dashboard');
+      } catch (err) {
+        setError(err.response?.data?.error || 'Google sign-up failed. Please try again.');
+      } finally {
+        setGLoading(false);
+      }
     },
     onError: () => setError('Google sign-in was cancelled or failed.'),
   });
