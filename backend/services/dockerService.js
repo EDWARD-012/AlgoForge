@@ -92,11 +92,15 @@ async function executeCode(language, userCode, problemMeta, testCases) {
       break;
     case 'java':
       fileName   = 'Main.java';
-      runCommand = `docker run --rm --network=none -v ${dockerMountPath} -w /usr/src/app openjdk:17-slim sh -c "javac Main.java && java Main"`;
+      runCommand = `docker run --rm --network=none -v ${dockerMountPath} -w /usr/src/app openjdk:17-jdk-slim sh -c "javac Main.java && java Main"`;
       break;
     case 'python':
       fileName   = 'script.py';
       runCommand = `docker run --rm --network=none -v ${dockerMountPath} -w /usr/src/app python:3.9-slim sh -c "python script.py"`;
+      break;
+    case 'javascript':
+      fileName   = 'script.js';
+      runCommand = `docker run --rm --network=none -v ${dockerMountPath} -w /usr/src/app node:18-alpine sh -c "node script.js"`;
       break;
     default:
       await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
