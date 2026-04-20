@@ -1,7 +1,6 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Navigate, useNavigate } from 'react-router-dom'
 import { Editor } from '@monaco-editor/react'
-import { mockProblems } from '../utils/dummyData'
 import { useUserStore } from '../store/useUserStore'
 import api from '../utils/api'
 import {
@@ -244,14 +243,29 @@ export const Problem = () => {
   const [testResults, setTestResults] = useState(null)
   const [bottomTab, setBottomTab]     = useState('testcase')
   const [selCase, setSelCase]         = useState(0)
+  const [problem, setProblem]         = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [errorFetching, setErrorFetching] = useState(false)
   const editorRef = useRef(null)
 
-  const problem = mockProblems.find(p => p.id === parseInt(id))
-  if (!problem) return <Navigate to="/dashboard" replace />
+  useEffect(() => {
+    api.get(`/problems/${id}`)
+      .then(res => {
+        setProblem(res.data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setErrorFetching(true)
+        setLoading(false)
+      })
+  }, [id])
+
+  if (loading) return <div className="flex h-screen items-center justify-center bg-[#1a1a1a] text-white">Loading Problem...</div>
+  if (errorFetching || !problem) return <Navigate to="/dashboard" replace />
 
   const currentLang = LANGS.find(l => l.value === lang) || LANGS[0]
   const d = DIFFICULTY[problem.difficulty] || DIFFICULTY.Easy
-  const problemIdx  = mockProblems.findIndex(p => p.id === parseInt(id))
 
   const handleEditorMount = (editor) => { editorRef.current = editor }
 
@@ -270,12 +284,6 @@ export const Problem = () => {
       return;
     }
 
-    if (lang === 'javascript') {
-      setTestResults({ error: 'JavaScript execution is not yet supported.\nPlease switch to C++, Python 3, or Java.' })
-      setBottomTab('result')
-      return
-    }
-
     setIsRunning(true)
     setTestResults(null)
     setBottomTab('result')
@@ -286,7 +294,7 @@ export const Problem = () => {
       const { data } = await api.post('/execute', {
         language:  lang,
         code,
-        problemId: problem.id,
+        problemId: problem.problemNumber,
       })
 
       if (data.error) {
@@ -315,20 +323,18 @@ export const Problem = () => {
           </button>
           {/* Prev / Next arrows */}
           <div className="ml-auto flex items-center gap-0.5 pr-2">
-            {mockProblems[problemIdx - 1] && (
-              <a href={`/problem/${mockProblems[problemIdx - 1].id}`}
+            {problem.problemNumber > 1 && (
+              <a href={`/problem/${problem.problemNumber - 1}`}
                  className="p-1.5 rounded hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
                  title="Previous problem">
                 <ChevronLeft className="w-4 h-4" />
               </a>
             )}
-            {mockProblems[problemIdx + 1] && (
-              <a href={`/problem/${mockProblems[problemIdx + 1].id}`}
-                 className="p-1.5 rounded hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
-                 title="Next problem">
-                <ChevronRight className="w-4 h-4" />
-              </a>
-            )}
+            <a href={`/problem/${problem.problemNumber + 1}`}
+               className="p-1.5 rounded hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
+               title="Next problem">
+              <ChevronRight className="w-4 h-4" />
+            </a>
           </div>
         </div>
 

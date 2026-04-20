@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useUserStore } from '../store/useUserStore'
-import { mockProblems } from '../utils/dummyData'
+import api from '../utils/api'
 import { Zap, TrendingUp, Target, ArrowRight, Lock, CheckCircle } from 'lucide-react'
 
 const difficultyStyle = (d) => {
@@ -57,6 +57,19 @@ const TopicBar = ({ label, pct, delay = 0 }) => (
 export const Dashboard = () => {
   const { userLevel, isGuest, user } = useUserStore()
   const navigate = useNavigate()
+  
+  const [dbProblems, setDbProblems] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/problems').then(res => {
+      setDbProblems(res.data)
+      setLoading(false)
+    }).catch(err => {
+      console.error(err)
+      setLoading(false)
+    })
+  }, [])
 
   // Allow both logged-in users and guests to view dashboard
   if (!userLevel && !isGuest) {
@@ -64,22 +77,27 @@ export const Dashboard = () => {
   }
 
   const getRecommendation = () => {
+    if (!dbProblems.length) return null
     let targetDifficulty = 'Easy'
     if (userLevel === 'Intermediate') targetDifficulty = 'Medium'
     if (userLevel === 'Advanced')     targetDifficulty = 'Hard'
-    return mockProblems.find(p => p.difficulty === targetDifficulty) || mockProblems[0]
+    return dbProblems.find(p => p.difficulty === targetDifficulty) || dbProblems[0]
   }
 
   const recommended = getRecommendation()
   const displayName = user?.name || (isGuest ? 'Explorer' : 'Learner')
 
-  const handleSolve = (id) => {
+  const handleSolve = (problemNumber) => {
     if (isGuest) {
       alert('Please sign in or create a free account to solve problems and track your progress!')
       navigate('/register')
     } else {
-      navigate(`/problem/${id}`)
+      navigate(`/problem/${problemNumber}`)
     }
+  }
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white' }}>Loading Dashboard...</div>
   }
 
   return (
@@ -191,37 +209,41 @@ export const Dashboard = () => {
           </p>
 
           {/* Problem Card */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            onClick={() => handleSolve(recommended.id)}
-            style={{
-              background: 'rgba(8,8,15,0.6)', border: '1px solid var(--border)',
-              borderRadius: '12px', padding: '16px', marginBottom: '16px',
-              cursor: 'pointer', transition: 'border-color 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{
-                fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
-                color: difficultyStyle(recommended.difficulty).color,
-                background: difficultyStyle(recommended.difficulty).bg,
-                border: `1px solid ${difficultyStyle(recommended.difficulty).border}`,
-                padding: '3px 8px', borderRadius: '5px',
-              }}>{recommended.difficulty}</span>
-              <span style={{
-                fontSize: '0.72rem', color: 'var(--text-muted)',
-                background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: '5px',
-              }}>{recommended.topic}</span>
-            </div>
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {recommended.title}
-            </h3>
-          </motion.div>
+          {recommended ? (
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              onClick={() => handleSolve(recommended.problemNumber)}
+              style={{
+                background: 'rgba(8,8,15,0.6)', border: '1px solid var(--border)',
+                borderRadius: '12px', padding: '16px', marginBottom: '16px',
+                cursor: 'pointer', transition: 'border-color 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <span style={{
+                  fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+                  color: difficultyStyle(recommended.difficulty).color,
+                  background: difficultyStyle(recommended.difficulty).bg,
+                  border: `1px solid ${difficultyStyle(recommended.difficulty).border}`,
+                  padding: '3px 8px', borderRadius: '5px',
+                }}>{recommended.difficulty}</span>
+                <span style={{
+                  fontSize: '0.72rem', color: 'var(--text-muted)',
+                  background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: '5px',
+                }}>{recommended.topics?.[0] || 'Algorithm'}</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {recommended.title}
+              </h3>
+            </motion.div>
+          ) : (
+             <div style={{color: 'grey', fontSize: '13px', marginBottom: '16px'}}>No problems available</div>
+          )}
 
           <motion.button
-            onClick={() => handleSolve(recommended.id)}
+            onClick={() => recommended && handleSolve(recommended.problemNumber)}
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.97 }}
             style={{
@@ -247,19 +269,19 @@ export const Dashboard = () => {
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Problem Set</h2>
         </div>
-        {mockProblems.map((p, i) => {
+        {dbProblems.map((p, i) => {
           const ds = difficultyStyle(p.difficulty)
           return (
             <motion.div
-              key={p.id}
+              key={p._id || p.problemNumber}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.35 + i * 0.08 }}
-              onClick={() => handleSolve(p.id)}
+              onClick={() => handleSolve(p.problemNumber)}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '16px 24px', cursor: 'pointer',
-                borderBottom: i < mockProblems.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                borderBottom: i < dbProblems.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
                 transition: 'background 0.15s',
               }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,58,237,0.06)'}
@@ -267,12 +289,12 @@ export const Dashboard = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', fontWeight: 600, minWidth: '24px' }}>
-                  {String(p.id).padStart(2, '0')}
+                  {String(p.problemNumber).padStart(2, '0')}
                 </span>
                 <div>
                   <span style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)' }}>{p.title}</span>
                   <div style={{ display: 'flex', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
-                    {p.tags?.slice(0,2).map(t => (
+                    {p.topics?.slice(0,2).map(t => (
                       <span key={t} style={{
                         fontSize: '0.7rem', color: 'var(--text-subtle)',
                         background: 'rgba(255,255,255,0.04)', padding: '2px 7px', borderRadius: '4px',
